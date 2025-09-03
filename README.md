@@ -123,11 +123,6 @@ The sample E2E test (`test_careers_e2e.py`) validates:
 
 ---
 
-## 📜 License
-This project is licensed under the MIT License.
-
----
-
 # 📦 requirements.txt
 ```
 selenium>=4.18.1
