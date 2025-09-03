@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  insider-tests:
+    build: .
+    container_name: insider_automation
+    volumes:
+      - .:/app
+    shm_size: '2gb'
