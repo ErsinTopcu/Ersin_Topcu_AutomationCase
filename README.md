@@ -8,49 +8,44 @@ The framework follows the **Page Object Model (POM)**, is **Dockerized**, and re
 ## 📂 Project Structure
 
 ```
-insider_automation/
-│── tests/                     # Test cases
-│   └── test_careers_e2e.py
-│
-│── pages/                     # Page Object Model classes
-│   ├── base_page.py           # Shared waits, actions, helpers
+├── pages/                   # Page Object classes (POM)
+│   ├── base_page.py         # Shared waits, actions, helpers
 │   ├── home_page.py
 │   ├── careers_page.py
 │   ├── qa_jobs_page.py
 │   └── job_detail_page.py
-│
-│── utils/                     # Utilities
+├── tests/
+│   └── test_careers_e2e.py  # Main E2E scenario
+├── utils/                   # Logger, screenshots, driver factory
+│   ├── driver_factory.py
 │   ├── logger.py
-│   ├── screenshot.py
-│   └── driver_factory.py
-│
-│── conftest.py                # Pytest fixtures
-│── pytest.ini                 # Pytest configuration
-│── requirements.txt           # Dependencies
-│── Dockerfile                 # Docker build
-│── docker-compose.yml         # Docker orchestration
-│── Jenkinsfile                # Jenkins pipeline
-│── Makefile                   # Shortcuts (make build/test/clean)
+│   └── screenshot.py
+├── .github/workflows/ci.yml # GitHub Actions (CI)
+├── conftest.py              # Pytest fixtures
+├── docker-compose.yml       # Docker orchestration
+├── Dockerfile               # Container image
+├── Jenkinsfile              # Jenkins pipeline
+├── Makefile                 # make build/test/clean helpers
+├── pytest.ini               # Pytest config
+├── requirements.txt         # Dependencies
+└── README.md
 ```
 
 ---
 
 ## ✨ Features
 
-- **Page Object Model (POM)**  
-- **Reusable waits** (`wait_until_visible`, `wait_until_clickable`)  
-- **Select2 dropdown handling** (robust, waits until ready)  
-- **Hover + click** on job cards to reveal "View Role"  
-- **New tab switching & Lever form verification**  
-- **Verify all QA jobs** contain:
-  - Position → includes `"Quality Assurance"`
-  - Department → includes `"Quality Assurance"`
-  - Location → includes `"Istanbul, Turkey"`  
-- **Error screenshots** saved under `utils/screenshots/error_screenshots/YYYY-MM-DD/`  
-- **Logs** for every step  
-- **Reports**: HTML + JUnit XML  
-- **Dockerized** for local/CI runs  
-- **CI/CD ready** (GitHub Actions + Jenkins)  
+- 🧩 Modular **Page Object Model (POM)** architecture (clear page responsibilities)
+- ⏱️ Explicit synchronization via **WebDriverWait** + **Expected Conditions**
+- 🧭 Readiness utilities: **DOM complete** check, **smart scroll**, presence/visibility/clickable helpers
+- 🔽 **Select2-capable** dropdown utilities (search-first with robust fallbacks)
+- ♻️ **Lazy-load aware** scrolling to stabilize infinite lists
+- 🪟 New tab/window switching with **URL substring** assertion
+- 🧾 Structured, readable **logging** for step-by-step traceability
+- 📸 **Automatic screenshots** on failures (dated directories)
+- 🍪 Cookie banner handling (multi-locale ready)
+- 🧪 **Pytest-first** setup with fixtures and configuration
+- ⚙️ **CI/CD-friendly**: headless execution, report & artifact hooks
 
 ---
 
