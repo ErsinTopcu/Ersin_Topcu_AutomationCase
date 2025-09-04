@@ -22,14 +22,19 @@ class QaJobsPage(BasePage):
     def wait_until_filters_ready(self, timeout: int = 20):
         """Ensure QA jobs page and both Select2 triggers are ready before clicking."""
         # page readyState
-        WebDriverWait(self.driver, timeout).until(
+        wait = WebDriverWait(self.driver, timeout)
+        wait.until(
             lambda d: d.execute_script("return document.readyState") == "complete"
         )
         # both filters visible & clickable
-        self.wait_until_visible(self.FILTER_LOCATION, "Location filter not visible")
-        self.wait_until_visible(self.FILTER_DEPARTMENT, "Department filter not visible")
-        self.wait_until_clickable(self.FILTER_LOCATION, "Location filter not clickable")
-        self.wait_until_clickable(self.FILTER_DEPARTMENT, "Department filter not clickable")
+        filters = [self.FILTER_LOCATION, self.FILTER_DEPARTMENT]
+        combined_locator = (
+            By.CSS_SELECTOR,
+            "#select2-filter-by-location-container, #select2-filter-by-department-container",
+        )
+        wait.until(EC.visibility_of_all_elements_located(combined_locator))
+        for locator in filters:
+            wait.until(EC.element_to_be_clickable(locator))
         self.logger.info("QA Jobs page & filters are ready.")
 
 
