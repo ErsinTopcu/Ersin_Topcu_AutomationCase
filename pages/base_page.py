@@ -1,3 +1,5 @@
+from time import sleep
+
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utils.logger import get_logger
@@ -18,11 +20,6 @@ class BasePage:
         el.send_keys(text)
         self.logger.info(f"Typed '{text}' into element: {locator}")
 
-    def get_text(self, locator):
-        text = self.wait.until(EC.visibility_of_element_located(locator)).text
-        self.logger.info(f"Got text from {locator}: {text}")
-        return text
-
     def element_exists(self, locator):
         try:
             self.wait.until(EC.visibility_of_element_located(locator))
@@ -31,35 +28,62 @@ class BasePage:
             return False
 
     def smart_scroll(self, locator):
-        element = self.wait.until(EC.presence_of_element_located(locator))
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        self.logger.info(f"Scrolled to element: {locator}")
+        """Your existing smart_scroll; keep as-is if already implemented."""
+        el = self.wait_until_visible(locator)
+        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+        return el
 
+    # --- Generic waits ---
     def wait_until_visible(self, locator, message: str = ""):
         return self.wait.until(EC.visibility_of_element_located(locator), message)
 
     def wait_until_clickable(self, locator, message: str = ""):
         return self.wait.until(EC.element_to_be_clickable(locator), message)
 
-    def switch_to_new_tab_and_verify(self, expected_url_contains: str, timeout: int = 15):
-        """Wait for a new tab, switch to it, then verify URL contains substring."""
-        original_handles = self.driver.window_handles
-        self.logger.info(f"Current window handles before click: {original_handles}")
+    def wait_until_any_present(self, locator, message: str = ""):
+        self.wait.until(EC.presence_of_element_located(locator), message)
+        return self.driver.find_elements(*locator)
 
-        # Wait until a new window/tab is opened
+    def wait_dom_complete(self, timeout: int = 20):
+        """Wait until document.readyState == 'complete'."""
         WebDriverWait(self.driver, timeout).until(
-            lambda d: len(d.window_handles) > len(original_handles)
+            lambda d: d.execute_script("return document.readyState") == "complete"
         )
 
-        new_handles = self.driver.window_handles
-        self.logger.info(f"New window handles after click: {new_handles}")
+    def switch_to_new_tab_and_verify(self, expected_url_contains: str, timeout: int = 10):
+        """
+        Switch to the newly opened tab and verify the URL contains the expected substring.
+        Call this right after the click that opens the new tab.
+        """
+        from selenium.webdriver.support.ui import WebDriverWait
 
-        # Switch to the newest handle
-        new_tab = [h for h in new_handles if h not in original_handles][0]
-        self.driver.switch_to.window(new_tab)
+        # Wait until a second tab exists
+        WebDriverWait(self.driver, timeout).until(lambda d: len(d.window_handles) > 1)
 
-        # Verify expected URL part
-        WebDriverWait(self.driver, timeout).until(
-            lambda d: expected_url_contains in d.current_url
-        )
-        self.logger.info(f"Switched to new tab with URL: {self.driver.current_url}")
+        # Switch to the last handle (newly opened tab)
+        self.driver.switch_to.window(self.driver.window_handles[-1])
+
+        # Verify URL contains expected substring
+        WebDriverWait(self.driver, timeout).until(lambda d: expected_url_contains in d.current_url)
+        current = self.driver.current_url
+        assert expected_url_contains in current, f"New tab URL mismatch. Expected contains: {expected_url_contains}, got: {current}"
+        return current
+
+    def scroll_to_bottom_until_stable(self, max_passes: int = 8, settle_checks: int = 2, sleep_s: float = 0.3):
+        """
+        Repeatedly scroll to the bottom until page height stops growing
+        for 'settle_checks' consecutive iterations (handles lazy-loading).
+        """
+        stable = 0
+        last_h = 0
+        for _ in range(max_passes):
+            h = self.driver.execute_script("return document.body.scrollHeight")
+            if h == last_h:
+                stable += 1
+                if stable >= settle_checks:
+                    break
+            else:
+                stable = 0
+                last_h = h
+            self.driver.execute_script("window.scrollTo(0, arguments[0]);", h)
+            sleep(sleep_s)

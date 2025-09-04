@@ -18,15 +18,13 @@ class TestCareersE2E:
 
             careers.verify_blocks()
             careers.go_to_qa()
-            careers.go_to_qa_jobs()
+            qa_jobs.go_to_qa_jobs()
 
-            qa_jobs.wait_until_filters_ready()
-            qa_jobs.filter_jobs()
+            qa_jobs.filter_jobs(location_text="Istanbul, Turkiye", department_text="Quality Assurance")
             qa_jobs.verify_jobs_loaded()
             job_detail.verify_all_job_details()
-            #qa_jobs.open_first_job()
-
-
+            qa_jobs.open_job_by_index_via_hover()
+            home.switch_to_new_tab_and_verify("https://jobs.lever.co/useinsider", timeout=10)
 
         except Exception as e:
             take_screenshot(driver, self.__class__.__name__, "test_careers_flow")

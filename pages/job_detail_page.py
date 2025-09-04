@@ -22,7 +22,7 @@ class JobDetailPage(BasePage):
 
             assert "Quality Assurance" in pos_text, f"Position missing 'Quality Assurance' in job {idx}: {pos_text}"
             assert "Quality Assurance" in dept_text, f"Department mismatch in job {idx}: {dept_text}"
-            assert "Istanbul, Turkey" in loc_text, f"Location mismatch in job {idx}: {loc_text}"
+            assert "Istanbul, Turkiye" in loc_text, f"Location mismatch in job {idx}: {loc_text}"
 
             self.logger.info(
                 f"Job {idx} verified → Position: {pos_text}, Department: {dept_text}, Location: {loc_text}"
